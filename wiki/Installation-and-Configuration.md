@@ -61,7 +61,7 @@ The configured data directory must exist and be readable. Polygeo exits with sta
 docker build -t polygeo .
 ```
 
-The Dockerfile uses a Go 1.25 Alpine build stage and creates a statically linked binary. The runtime image uses Alpine and runs Polygeo as the non-root `polygeo` user.
+The Dockerfile uses a Go 1.25 Alpine build stage and builds the executable with `CGO_ENABLED=0`, `-trimpath`, and stripped symbol/debug information. The runtime image uses Alpine and runs Polygeo as the non-root `polygeo` user.
 
 ## Docker run with a mounted data directory
 
