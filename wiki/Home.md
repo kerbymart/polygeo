@@ -48,6 +48,6 @@ curl http://localhost:8080/countries/PH
 
 See [Installation and Configuration](Installation-and-Configuration) for deployment instructions and [Country Data Packages](Country-Data-Packages) for the exact package contract.
 
-## Versioned source
+## Versioned source and publication
 
-The Markdown files under [`wiki/`](https://github.com/kerbymart/polygeo/tree/main/wiki) are the source of truth for this Wiki. Changes merged into `main` are published by the repository's `Publish Wiki` workflow.
+The Markdown files under [`wiki/`](https://github.com/kerbymart/polygeo/tree/main/wiki) are the source of truth for the GitHub Wiki. The `Publish Wiki` workflow replaces the live Wiki contents with this directory whenever a Wiki-source change is merged or committed to `main`. This keeps the Home page, documentation pages, sidebar, and footer synchronized with the repository.
