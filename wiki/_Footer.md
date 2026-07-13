@@ -1,1 +1,1 @@
-Polygeo documentation is versioned with the [source repository](https://github.com/kerbymart/polygeo). Country data remains outside the application binary and is loaded from `POLYGEO_DATA_DIR` during startup.
+Polygeo documentation is versioned with the [source repository](https://github.com/kerbymart/polygeo). Country data remains outside the application binary and is loaded from `POLYGEO_DATA_DIR` during startup. See the [README](https://github.com/kerbymart/polygeo#readme) for the concise project contract.
