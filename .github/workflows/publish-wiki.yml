@@ -29,6 +29,7 @@ jobs:
         run: |
           set -euo pipefail
 
+          source_commit="$GITHUB_SHA"
           source_directory="$GITHUB_WORKSPACE/wiki"
           wiki_directory="$RUNNER_TEMP/polygeo-wiki"
           wiki_remote="https://github.com/${GITHUB_REPOSITORY}.wiki.git"
@@ -47,10 +48,29 @@ jobs:
           git -C "$wiki_directory" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git -C "$wiki_directory" add -A
 
-          if git -C "$wiki_directory" diff --cached --quiet; then
+          if ! git -C "$wiki_directory" diff --cached --quiet; then
+            git -C "$wiki_directory" commit -m "Publish wiki from ${source_commit::12}"
+            git -c http.extraheader="AUTHORIZATION: basic $authorization" -C "$wiki_directory" push origin HEAD:master
+          else
             echo "Wiki is already current."
-            exit 0
           fi
 
-          git -C "$wiki_directory" commit -m "Publish wiki from ${GITHUB_SHA::12}"
-          git -c http.extraheader="AUTHORIZATION: basic $authorization" -C "$wiki_directory" push origin HEAD:master
+          wiki_commit="$(git -C "$wiki_directory" rev-parse HEAD)"
+          published_at="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+
+          git -C "$GITHUB_WORKSPACE" config user.name "github-actions[bot]"
+          git -C "$GITHUB_WORKSPACE" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          cat > "$GITHUB_WORKSPACE/.github/wiki-publication.json" <<EOF
+          {
+            "source_commit": "$source_commit",
+            "wiki_commit": "$wiki_commit",
+            "published_at": "$published_at"
+          }
+          EOF
+
+          git -C "$GITHUB_WORKSPACE" add .github/wiki-publication.json
+          if ! git -C "$GITHUB_WORKSPACE" diff --cached --quiet; then
+            git -C "$GITHUB_WORKSPACE" commit -m "Record wiki publication"
+            git -C "$GITHUB_WORKSPACE" push origin HEAD:main
+          fi
