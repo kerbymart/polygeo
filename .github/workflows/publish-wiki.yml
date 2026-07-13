@@ -1,0 +1,56 @@
+name: Publish Wiki
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "wiki/**"
+      - ".github/workflows/publish-wiki.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: publish-wiki
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publish wiki pages
+        env:
+          WIKI_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          source_directory="$GITHUB_WORKSPACE/wiki"
+          wiki_directory="$RUNNER_TEMP/polygeo-wiki"
+          wiki_remote="https://github.com/${GITHUB_REPOSITORY}.wiki.git"
+          authorization="$(printf 'x-access-token:%s' "$WIKI_TOKEN" | base64 -w 0)"
+
+          if ! git -c http.extraheader="AUTHORIZATION: basic $authorization" clone "$wiki_remote" "$wiki_directory"; then
+            mkdir -p "$wiki_directory"
+            git -C "$wiki_directory" init -b master
+            git -C "$wiki_directory" remote add origin "$wiki_remote"
+          fi
+
+          find "$wiki_directory" -mindepth 1 -maxdepth 1 ! -name .git -exec rm -rf {} +
+          cp -a "$source_directory/." "$wiki_directory/"
+
+          git -C "$wiki_directory" config user.name "github-actions[bot]"
+          git -C "$wiki_directory" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git -C "$wiki_directory" add -A
+
+          if git -C "$wiki_directory" diff --cached --quiet; then
+            echo "Wiki is already current."
+            exit 0
+          fi
+
+          git -C "$wiki_directory" commit -m "Publish wiki from ${GITHUB_SHA::12}"
+          git -c http.extraheader="AUTHORIZATION: basic $authorization" -C "$wiki_directory" push origin HEAD:master
