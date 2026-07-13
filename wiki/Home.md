@@ -47,3 +47,7 @@ curl http://localhost:8080/countries/PH
 ```
 
 See [Installation and Configuration](Installation-and-Configuration) for deployment instructions and [Country Data Packages](Country-Data-Packages) for the exact package contract.
+
+## Versioned source
+
+The Markdown files under [`wiki/`](https://github.com/kerbymart/polygeo/tree/main/wiki) are the source of truth for this Wiki. Changes merged into `main` are published by the repository's `Publish Wiki` workflow.
